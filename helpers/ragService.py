@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 from dotenv import load_dotenv
 
@@ -19,27 +19,29 @@ def langchain_expression_language(question: str, knowledge_base):
     """)
 
     # LLM
-    llm = ChatOpenAI(
-        model="gpt-4o",
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-2.5-flash",
         temperature=0,
-        openai_api_key=os.getenv("OPENAI_API_KEY")
+        google_api_key=os.getenv("GOOGLE_API_KEY")
     )
-
     # Retriever
     retriever = knowledge_base.as_retriever()
     docs = retriever.invoke(question)
 
     # Build context text
     context_text = "\n\n".join([doc.page_content for doc in docs])
+    print("context type:", type(context_text))
+    print("question type:", type(question))
+
 
     # Build LCEL chain
     chain = (
-        {"question": question, "context": context_text}
+        {"question": RunnablePassthrough(), "context": RunnablePassthrough()}
         | prompt
         | llm
         | StrOutputParser()
     )
 
     # IMPORTANT: execute chain and return result
-    result = chain.invoke({})
+    result = chain.invoke({"question": question, "context": context_text})
     return result
