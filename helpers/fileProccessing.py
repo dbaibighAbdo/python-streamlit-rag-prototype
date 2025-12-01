@@ -1,6 +1,8 @@
 from PyPDF2 import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
+from langchain_ollama import OllamaEmbeddings
 import os 
 from langchain_community.vectorstores import FAISS
 from dotenv import load_dotenv
@@ -30,9 +32,19 @@ def split_text(text, chunk_size=1000, overlap=200):
     return chunks
 
 def embed_store_texts(chunks):
+    '''
     embedding_model = GoogleGenerativeAIEmbeddings(
         model="models/gemini-embedding-001",
         google_api_key=os.getenv("GOOGLE_API_KEY")
+    )
+    
+    embedding_model = OpenAIEmbeddings(
+        model="text-embedding-3-small",
+        openai_api_key=os.getenv("OPENAI_API_KEY")
+    )
+    '''
+    embedding_model = OllamaEmbeddings( 
+        model="mxbai-embed-large"
     )
     knowledge_base = FAISS.from_texts(chunks, embedding_model)
     knowledge_base.save_local("FAISS_DB/faiss_index")

@@ -2,6 +2,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
+from langchain_ollama.llms import OllamaLLM
 import os
 from dotenv import load_dotenv
 
@@ -19,10 +21,21 @@ def langchain_expression_language(question: str, knowledge_base):
     """)
 
     # LLM
+    '''
     llm = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
         temperature=0,
         google_api_key=os.getenv("GOOGLE_API_KEY")
+    )
+    
+    llm = ChatOpenAI(
+        model="gpt-4o-mini",
+        temperature=0,
+        openai_api_key=os.getenv("OPENAI_API_KEY")
+    )
+    '''
+    llm = OllamaLLM(
+        model="llama3.2"
     )
     # Retriever
     retriever = knowledge_base.as_retriever()
